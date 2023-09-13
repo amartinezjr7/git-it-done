@@ -3,18 +3,18 @@ var limitWarningEl = document.querySelector("#limit-warning");
 var repoNameEl = document.querySelector("#repo-name");
 
 var getRepoIssues = function(repo){
-    console.log(repo);
     var apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
     fetch(apiUrl).then(function(response){
         if(response.ok){
             response.json().then(function(data){
                 //pass response data to dom function
                 displayIssues(data);
-                
-                displayWarning(repo);
+                if(response.headers.get("Link")){
+                   displayWarning(repo); 
+                }    
             });
         }else{
-            alert("There was a problem with your request!");
+            document.location.replace("./index.html");
         }
     });
 };
@@ -22,8 +22,13 @@ var getRepoIssues = function(repo){
 var getRepoName = function(){
     var quertString = document.location.search;
     var repoName = quertString.split("=")[1];
-    getRepoIssues(repoName);
-    repoNameEl.textContent = repoName;
+    if(repoName){
+        repoNameEl.textContent = repoName;
+        getRepoIssues(repoName);
+    }else{
+        document.location.replace("./index.html");
+    }
+    
 }
 
 var displayIssues = function(issues){
